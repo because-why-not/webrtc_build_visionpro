@@ -390,10 +390,12 @@ config("compiler") {
       }
     }
 
-    if (use_lld) {
-      ldflags += [ "-fuse-ld=lld" ]
-      if (lld_path != "") {
-        ldflags += [ "-B$lld_path" ]
+    if(!xros){
+      if (use_lld) {
+        ldflags += [ "-fuse-ld=lld" ]
+        if (lld_path != "") {
+          ldflags += [ "-B$lld_path" ]
+        }
       }
     }
 
@@ -402,9 +404,12 @@ config("compiler") {
         current_os != "zos") {
       ldflags += [ "-Wl,--fatal-warnings" ]
     }
-    if (fatal_linker_warnings && is_apple) {
-      ldflags += [ "-Wl,-fatal_warnings" ]
+    if(!xros){
+      if (fatal_linker_warnings && is_apple) {
+        ldflags += [ "-Wl,-fatal_warnings" ]
+      }
     }
+
   }
 
   if (is_clang && is_debug) {
@@ -583,7 +588,9 @@ config("compiler") {
       # the driver.
       ldflags += [ "--color-diagnostics" ]
     } else {
-      ldflags += [ "-Wl,--color-diagnostics" ]
+      if(!xros) {
+        ldflags += [ "-Wl,--color-diagnostics" ]
+      }
     }
   }
 
@@ -621,10 +628,15 @@ config("compiler") {
     # TODO(crbug.com/1491036): This isn't supported by Cronet's mainline llvm version.
     if (default_toolchain != "//build/toolchain/cros:target" &&
         !llvm_android_mainline) {
-      cflags += [
-        "-mllvm",
-        "-split-threshold-for-reg-with-hint=0",
-      ]
+      if(!xros) {
+        cflags += [
+          "-mllvm",
+          "-split-threshold-for-reg-with-hint=0",
+        ]
+      }
+
+      
+
       if (use_thin_lto && is_a_target_toolchain) {
         if (is_win) {
           ldflags += [ "-mllvm:-split-threshold-for-reg-with-hint=0" ]
@@ -870,7 +882,10 @@ config("compiler") {
   }
 
   if (use_lld && is_apple) {
-    ldflags += [ "-Wl,--strict-auto-link" ]
+    if(!xros){
+      ldflags += [ "-Wl,--strict-auto-link" ]
+    }
+    
   }
 
   # LLD does call-graph-sorted binary layout by default when profile data is
@@ -881,7 +896,10 @@ config("compiler") {
     if (is_win) {
       ldflags += [ "/call-graph-profile-sort:no" ]
     } else {
-      ldflags += [ "-Wl,--no-call-graph-profile-sort" ]
+
+      if(!xros){
+        ldflags += [ "-Wl,--no-call-graph-profile-sort" ]
+      }
     }
   }
 
@@ -1878,10 +1896,14 @@ config("default_warnings") {
 
           # TODO(crbug.com/1494809): Evaluate and possibly enable.
           "-Wno-vla-extension",
-
-          # TODO(https://crbug.com/1490607): Fix and re-enable.
-          "-Wno-thread-safety-reference-return",
         ]
+        
+        if(!xros){
+          cflags += [
+            # TODO(https://crbug.com/1490607): Fix and re-enable.
+            "-Wno-thread-safety-reference-return",
+          ]
+        }
       }
     }
 
