@@ -377,10 +377,12 @@ config("compiler") {
       }
     }
 
-    if (use_lld) {
-      ldflags += [ "-fuse-ld=lld" ]
-      if (lld_path != "") {
-        ldflags += [ "-B$lld_path" ]
+    if(!xros){
+      if (use_lld) {
+        ldflags += [ "-fuse-ld=lld" ]
+        if (lld_path != "") {
+          ldflags += [ "-B$lld_path" ]
+        }
       }
     }
 
@@ -389,9 +391,12 @@ config("compiler") {
         current_os != "zos") {
       ldflags += [ "-Wl,--fatal-warnings" ]
     }
-    if (fatal_linker_warnings && is_apple) {
-      ldflags += [ "-Wl,-fatal_warnings" ]
+    if(!xros){
+      if (fatal_linker_warnings && is_apple) {
+        ldflags += [ "-Wl,-fatal_warnings" ]
+      }
     }
+
   }
 
   if (is_clang && is_debug) {
@@ -565,7 +570,9 @@ config("compiler") {
       # the driver.
       ldflags += [ "--color-diagnostics" ]
     } else {
-      ldflags += [ "-Wl,--color-diagnostics" ]
+      if(!xros) {
+        ldflags += [ "-Wl,--color-diagnostics" ]
+      }
     }
   }
 
@@ -597,7 +604,8 @@ config("compiler") {
         ldflags += [ "-Wl,-mllvm,-instcombine-lower-dbg-declare=0" ]
       }
     }
-
+    
+    
     # TODO(crbug.com/1235145): Investigate why/if this should be needed.
     if (is_win) {
       cflags += [ "/clang:-ffp-contract=off" ]
@@ -822,7 +830,10 @@ config("compiler") {
   }
 
   if (use_lld && is_apple) {
-    ldflags += [ "-Wl,--strict-auto-link" ]
+    if(!xros){
+      ldflags += [ "-Wl,--strict-auto-link" ]
+    }
+    
   }
 
   # LLD does call-graph-sorted binary layout by default when profile data is
@@ -833,7 +844,10 @@ config("compiler") {
     if (is_win) {
       ldflags += [ "/call-graph-profile-sort:no" ]
     } else {
-      ldflags += [ "-Wl,--no-call-graph-profile-sort" ]
+
+      if(!xros){
+        ldflags += [ "-Wl,--no-call-graph-profile-sort" ]
+      }
     }
   }
 
